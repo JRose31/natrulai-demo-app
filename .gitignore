@@ -14,6 +14,9 @@ venv/
 # VSCode config
 .vscode/
 
+# PyCharm files
+.idea/
+
 # Git
 *.log
 *.swp
