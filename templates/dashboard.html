@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Natrul AI Powered App{% endblock %}
+
+{% block navbar_items %}
+<li class="nav-item">
+    <a class="nav-link active" href="#">{{ user["email"] }}</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="https://www.natrul.ai/my-context" target="_blank">My Docs</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('signout') }}">Signout</a>
+</li>
+{% endblock %}
+
+{% block content %}
+    <div class="container p-0" style="">
+        <div class="text-center mb-5" style="height: 7vh">
+            <h1 class="display-6 fw-bold">Custom App</h1>
+        </div>
+        <div class="row mb-5" style="height: 60vh">
+            <div class="col-md-4">
+                <div class="d-flex flex-column">
+                  <h4 class="text-center">Ask</h4>
+                  <p class="text-center">Get answers to your questions</p>
+
+                  <div class="d-flex gap-2">
+                    <input id="ask-input" class="form-control" type="text" placeholder="Ask something...">
+                    <button id="ask-button" class="btn btn-sm btn-primary">
+                      <i class="bi bi-patch-question-fill"></i>
+                    </button>
+                  </div>
+
+                  <div id="response-box" class="mt-3"></div>
+                </div>
+            </div>
+            <div class="col-md-4 border-start">
+              <div class="d-flex flex-column">
+                <h4 class="text-center">Search</h4>
+                <p class="text-center">Find the information you need</p>
+
+                <div class="d-flex gap-2 mb-2">
+                  <input id="search-input" class="form-control" type="text" placeholder="Find something...">
+                  <button id="search-button" class="btn btn-sm btn-primary">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+
+                <div id="search-results" class="mt-2 small text-muted" style="max-height: 300px; overflow-y: auto;"></div>
+              </div>
+            </div>
+            <div class="col-md-4 border-start">
+                <div class="d-flex flex-column">
+                    <h4 class="text-center">Create</h4>
+                    <p class="text-center">Type efficiently with personalized AI</p>
+
+                    <div class="d-flex flex-column gap-2">
+                        <textarea
+                        class="form-control bg-white text-dark"
+                        id="inputArea"
+                        name="input"
+                        rows="5"
+                        placeholder="Start typing...">
+                        </textarea>
+                        <div class="d-flex justify-content-between">
+                            <div class="form-check d-none form-switch small">  <!-- Staged for use in autocompletion logic using complete-input API -->
+                              <input class="form-check-input" type="checkbox" id="autocompleteToggle" name="autocomplete_enabled">
+                              <label class="form-check-label" for="autocompleteToggle">Enable Autocomplete</label>
+                            </div>
+                            <button id="enhance-button" class="btn btn-sm btn-primary w-auto ms-auto">
+                              <span id="enhance-icon"><i class="bi bi-stars text-gold"></i></span>
+                              Enhance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="height: 3vh">
+            <div class="d-flex justify-content-center">
+                <p class="small text-secondary">Powered by  <a href="https://www.natrul.ai" class="link-secondary">Natrul AI</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const askButton = document.getElementById("ask-button");
+  const askInput = document.getElementById("ask-input");
+  const responseBox = document.getElementById("response-box");
+
+  askButton.addEventListener("click", () => {
+    const query = askInput.value.trim();
+    console.log(query, "{{ user['user_key'] }}", "{{ app_id }}")
+      console.log("responseBox:", responseBox);
+    if (!query) {
+      responseBox.textContent = "Please enter a question.";
+      return;
+    }
+
+    responseBox.textContent = "Thinking...";
+
+    fetch("https://www.natrul.ai/api/v1/ai/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: query,
+        user_key: "{{ user['user_key'] }}",
+        app_id: "{{ app_id }}"
+      })
+    })
+    .then(res => {
+      console.log("Raw response:", res);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Parsed response data:", data);
+
+      if (!data.response) {
+        console.warn("Missing 'response' field in API response.");
+      }
+
+      responseBox.textContent = data.data?.answer || "No answer returned.";
+    })
+    .catch(err => {
+      console.error("Fetch error:", err);
+      responseBox.textContent = "Something went wrong. Please try again.";
+    });
+
+  });
+</script>
+
+<script>
+  const searchButton = document.getElementById("search-button");
+  const searchInput = document.getElementById("search-input");
+  const searchResults = document.getElementById("search-results");
+
+  searchButton.addEventListener("click", () => {
+    const query = searchInput.value.trim();
+    if (!query) {
+      searchResults.textContent = "Please enter a search query.";
+      return;
+    }
+
+    searchResults.textContent = "Searching...";
+
+    fetch("https://www.natrul.ai/api/v1/ai/retrieve-context", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: query,
+        user_key: "{{ user['user_key'] }}",
+        app_id: "{{ app_id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("re:", data);
+      const matches = data?.data?.matches || [];
+
+      if (matches.length === 0) {
+        searchResults.textContent = "No relevant context found.";
+        return;
+      }
+
+      searchResults.innerHTML = matches.map((item, index) => `
+        <div class="mb-3 border-bottom pb-2">
+          <strong>Result ${index + 1}</strong>
+          <div class="mt-1 text-dark">
+            <small class="text-muted">Source: ${item.metadata?.filename || "Unknown"}</small>
+            <p class="mt-1 mb-0">${item.text}</p>
+          </div>
+        </div>
+      `).join("");
+    })
+    .catch(err => {
+      console.error("Search error:", err);
+      searchResults.textContent = "Something went wrong. Please try again.";
+    });
+  });
+</script>
+
+<script>
+  const enhanceButton = document.getElementById("enhance-button");
+  const enhanceIcon = document.getElementById("enhance-icon");
+  const inputArea = document.getElementById("inputArea");
+
+  enhanceButton.addEventListener("click", () => {
+    const inputText = inputArea.value.trim();
+    if (!inputText) {
+      inputArea.placeholder = "Please enter some text first.";
+      return;
+    }
+    enhanceIcon.innerHTML = `<span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>`;
+
+    fetch("https://www.natrul.ai/api/v1/ai/enhance-input", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: "Convert the following into a proper email, including greetings and a signature: "+inputText,
+        user_key: "{{ user['user_key'] }}",
+        app_id: "{{ app_id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const enhanced = data?.data?.enhanced_text;
+      if (enhanced) {
+        inputArea.value = enhanced;
+      } else {
+        console.warn("No enhanced text returned.");
+      }
+    })
+    .catch(err => {
+      console.error("Enhance error:", err);
+    })
+    .finally(() => {
+      enhanceIcon.innerHTML = `<i class="bi bi-stars text-gold"></i>`;
+    });
+  });
+</script>
+
+
+{% endblock %}

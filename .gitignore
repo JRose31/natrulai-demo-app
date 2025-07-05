@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# macOS system files
+.DS_Store
+
+# VSCode config
+.vscode/
+
+# Git
+*.log
+*.swp
+*~
+
+# Flask Session
+flask_session/
