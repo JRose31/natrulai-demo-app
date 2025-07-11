@@ -186,6 +186,8 @@
   const enhanceButton = document.getElementById("enhance-button");
   const enhanceIcon = document.getElementById("enhance-icon");
   const inputArea = document.getElementById("inputArea");
+  {#const prompt_prefix = ""#}
+  const prompt_prefix = "Write a thorough email to the help desk, including the ticket number (if not provided, place a holder 'Ticket Number:' in the final email). Also include a signature with name, email, and phone number."
 
   enhanceButton.addEventListener("click", () => {
     const inputText = inputArea.value.trim();
@@ -201,7 +203,8 @@
       body: JSON.stringify({
         query: inputText, // prefix with any relevant instructions for the desired output
         user_key: "{{ user['user_key'] }}",
-        app_id: "{{ app_id }}"
+        app_id: "{{ app_id }}",
+        instruct: prompt_prefix
       })
     })
     .then(res => res.json())
