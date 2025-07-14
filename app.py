@@ -93,6 +93,18 @@ def dashboard():
     return render_template('dashboard.html', user=user, app_id=app_id)
 
 
+@app.route('/email-generator', methods=["GET"])
+@signin_required
+def email_gen():
+    """
+    Contains frontend for AI features
+    - APIs fetched from javascript
+    :return:
+    """
+    user = session.get("user")
+    return render_template('email_generator.html', user=user, app_id=app_id)
+
+
 @app.route('/sign-out', methods=["GET"])
 def signout():
     """

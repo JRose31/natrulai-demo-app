@@ -1,0 +1,82 @@
+{% include 'base.html' %}
+
+
+{% block content %}
+<div class="container p-0" style="">
+        <div class="text-center mb-5" style="height: 7vh">
+{#            <h1 class="display-6 fw-bold">Help-Desk Email Generator</h1>#}
+        </div>
+        <div class="row mb-5" style="height: 60vh">
+            <div class="col-md-6 container text-center">
+    <div class="d-flex flex-column">
+        <h4 class="text-center">Help Desk Email Generator</h4>
+        <p class="text-center">Describe the issue you're experiencing. Include a ticket number if available.</p>
+
+        <div class="d-flex flex-column gap-2">
+            <textarea
+            class="form-control bg-white text-dark"
+            id="inputArea"
+            name="input"
+            rows="5"
+            placeholder="Start typing...">
+            </textarea>
+            <div class="d-flex justify-content-between">
+                <div class="form-check d-none form-switch small">  <!-- Staged for use in autocompletion logic using complete-input API -->
+                  <input class="form-check-input" type="checkbox" id="autocompleteToggle" name="autocomplete_enabled">
+                  <label class="form-check-label" for="autocompleteToggle">Enable Autocomplete</label>
+                </div>
+                <button id="enhance-button" class="btn btn-sm btn-primary w-auto ms-auto">
+                  <span id="enhance-icon"><i class="bi bi-stars text-gold"></i></span>
+                  Enhance
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const enhanceButton = document.getElementById("enhance-button");
+  const enhanceIcon = document.getElementById("enhance-icon");
+  const inputArea = document.getElementById("inputArea");
+  const prompt_prefix = "Write a thorough email to the help desk, including the ticket number (if not provided, place a holder 'Ticket Number:' in the final email). Also include a signature with name, email, and phone number."
+
+  enhanceButton.addEventListener("click", () => {
+    const inputText = inputArea.value.trim();
+    if (!inputText) {
+      inputArea.placeholder = "Please enter some text first.";
+      return;
+    }
+    enhanceIcon.innerHTML = `<span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>`;
+
+    fetch("https://www.natrul.ai/api/v1/ai/enhance-input", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: inputText,
+        instruct: prompt_prefix,
+        user_key: "{{ user['user_key'] }}",
+        app_id: "{{ app_id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const enhanced = data?.data?.enhanced_text;
+      if (enhanced) {
+        inputArea.value = enhanced;
+      } else {
+        console.warn("No enhanced text returned.");
+      }
+    })
+    .catch(err => {
+      console.error("Enhance error:", err);
+    })
+    .finally(() => {
+      enhanceIcon.innerHTML = `<i class="bi bi-stars text-gold"></i>`;
+    });
+  });
+</script>
+{% endblock %}
