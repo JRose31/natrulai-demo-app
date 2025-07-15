@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+  .app-section {
+    margin-top: 3rem;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .portal-card {
+    background: #fff;
+    border: 1px solid #e3e6ea;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+
+  .portal-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.08);
+    transform: translateY(-2px);
+  }
+
+  .portal-card h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .portal-card p {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .portal-card .btn {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  .disabled-btn {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+</style>
+{% endblock %}
+
+{% block navbar_items %}
+<li class="nav-item">
+    <a class="nav-link active" href="#">{{ user["email"] }}</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="https://www.natrul.ai/my-context" target="_blank">My Docs</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('signout') }}">Signout</a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="text-center my-5">
+    <h2 class="fw-bold">AI App Templates Portal</h2>
+    <p class="text-muted">Explore AI-powered apps built using embedded document context. Each category demonstrates a unique capability.</p>
+  </div>
+
+  <!-- Querying Section -->
+  <div class="app-section">
+    <h4><i class="bi bi-chat-dots me-2 text-primary"></i>Querying</h4>
+    <div class="app-grid mt-3">
+      <div class="portal-card">
+        <h6>Policy Explainer</h6>
+        <p>Answer questions about internal HR or policy documents.</p>
+        <a href="{{ url_for('policy_explainer') }}" class="btn btn-primary w-100">Launch</a>
+      </div>
+      <div class="portal-card">
+        <h6>Course Study Companion</h6>
+        <p>Support students with answers from lecture and course materials.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+      <div class="portal-card">
+        <h6>Client FAQ Assistant</h6>
+        <p>Auto-answer client-specific queries from onboarding documents.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Retrieval Section -->
+  <div class="app-section">
+    <h4><i class="bi bi-search me-2 text-primary"></i>Retrieval</h4>
+    <div class="app-grid mt-3">
+      <div class="portal-card">
+        <h6>Technical Document Finder</h6>
+        <p>Search internal engineering docs or manuals for relevant sections.</p>
+        <a href="{{ url_for('tech_doc_finder') }}" class="btn btn-primary w-100">Launch</a>
+      </div>
+      <div class="portal-card">
+        <h6>Employee Handbook Navigator</h6>
+        <p>Quickly find policy excerpts from HR documents.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+      <div class="portal-card">
+        <h6>Legal Case Retriever</h6>
+        <p>Surface the most relevant case law excerpts from uploaded briefs.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhancement Section -->
+  <div class="app-section">
+    <h4><i class="bi bi-magic me-2 text-primary"></i>Enhancement</h4>
+    <div class="app-grid mt-3">
+      <div class="portal-card">
+        <h6>Email Generator</h6>
+        <p>Turn shorthand notes into polished help desk emails.</p>
+        <a href="{{ url_for('email_gen') }}" class="btn btn-primary w-100">Launch</a>
+      </div>
+      <div class="portal-card">
+        <h6>Summary Assistant</h6>
+        <p>Convert large text inputs into concise summaries.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+      <div class="portal-card">
+        <h6>Formal Rewriter</h6>
+        <p>Reword messages into more professional tones.</p>
+        <button class="btn btn-secondary w-100 disabled-btn">Coming Soon</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

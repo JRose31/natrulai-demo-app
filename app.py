@@ -15,6 +15,7 @@ app.secret_key = "secret"
 CORS(app)  # Enable CORS for all routes and origins (safe for internal APIs)
 Session(app)
 
+# Assign per-route to link specific apps to associated frontend features
 app_id = os.environ.get("app_id")
 owner_id = os.environ.get("owner_id")
 
@@ -46,6 +47,9 @@ def index():
 
     :return:
     """
+    if session.get("signed_in"):
+        flash("Please sign out first.", "warning")
+        return redirect(url_for('portal'))
     return render_template('index.html')
 
 
@@ -75,10 +79,21 @@ def signin():
     if valid_user:
         session["user"] = valid_user
         flash("Sign-in successful!", "success")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('portal'))
     else:
         flash("Incorrect email or password.", "danger")
         return redirect(url_for('index'))
+
+@app.route('/portal', methods=["GET"])
+@signin_required
+def portal():
+    """
+    Contains frontend for AI features
+    - APIs fetched from javascript
+    :return:
+    """
+    user = session.get("user")
+    return render_template('portal.html', user=user, app_id=app_id)
 
 
 @app.route('/dashboard', methods=["GET"])
@@ -103,6 +118,30 @@ def email_gen():
     """
     user = session.get("user")
     return render_template('email_generator.html', user=user, app_id=app_id)
+
+
+@app.route('/policy-explainer', methods=["GET"])
+@signin_required
+def policy_explainer():
+    """
+    Contains frontend for AI features
+    - APIs fetched from javascript
+    :return:
+    """
+    user = session.get("user")
+    return render_template('policy_explainer.html', user=user, app_id=app_id)
+
+
+@app.route('/tech-doc-finderr', methods=["GET"])
+@signin_required
+def tech_doc_finder():
+    """
+    Contains frontend for AI features
+    - APIs fetched from javascript
+    :return:
+    """
+    user = session.get("user")
+    return render_template('tech_doc_finder.html', user=user, app_id=app_id)
 
 
 @app.route('/sign-out', methods=["GET"])

@@ -11,8 +11,6 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-
-    {% block head %}{% endblock %}
     <style>
         .text-gold{
             color: #eabe24;
@@ -22,13 +20,14 @@
             max-height: 100vh;
         }
     </style>
+    {% block head %}{% endblock %}
 </head>
 <body class="bg-light text-dark">
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm" style="height: 10vh;">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">Natrul AI <span class="text-secondary fw-normal">| Demo App</span></a>
+            <a class="navbar-brand fw-bold" href="/">Natrul AI <span class="text-secondary fw-normal">| Demo Apps</span></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+
+{% block head %}
+<style>
+  .main-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .main-content {
+    flex: 1 1 60%;
+    min-width: 300px;
+  }
+
+  .sidebar {
+    flex: 1 1 30%;
+    min-width: 250px;
+  }
+
+  .sidebar .app-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e3e6ea;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    text-decoration: none;
+    color: #212529;
+    transition: background-color 0.2s;
+  }
+
+  .sidebar .app-link:hover {
+    background-color: #e9ecef;
+  }
+
+  .sidebar .app-link i {
+    color: #0d6efd;
+  }
+
+  .result {
+    display: none;
+    border: 2px solid #0d6efd;
+    border-radius: 6px;
+    padding: 1rem;
+    animation: none;
+  }
+
+  .result.pulse {
+    animation: pulse 1s ease-out;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 rgba(13,110,253,0.5); }
+    50% { box-shadow: 0 0 15px rgba(13,110,253,0.6); }
+    100% { box-shadow: 0 0 0 rgba(13,110,253,0.4); }
+  }
+
+  pre { white-space: pre-wrap; }
+</style>
+{% endblock %}
+
+{% block navbar_items %}
+<li class="nav-item">
+    <a href="{{ url_for('portal') }}" class="nav-link">Portal</a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">Policy Explainer</h2>
+    <p class="lead text-muted">Ask natural questions about company policies and get personalized answers from your internal documents.</p>
+  </div>
+
+  <div class="main-layout">
+    <!-- Left: Main Interaction Area -->
+    <div class="main-content">
+      <!-- Instructions -->
+      <div class="border rounded-3 p-3 bg-light shadow-sm mb-4">
+        <h5 class="fw-semibold">How to Use</h5>
+        <ul class="small mb-0">
+          <li>Upload your internal policy PDFs in the app settings.</li>
+          <li>Ask questions in plain English — e.g., “Can I take half-day PTO for doctor visits?”</li>
+          <li>The AI will answer using the context of your actual HR documents.</li>
+        </ul>
+      </div>
+
+      <!-- Input -->
+      <textarea id="queryInput" class="form-control" rows="4" placeholder="Ask about any HR or company policy…"></textarea>
+      <div class="text-end mt-2">
+        <button id="runQuery" class="btn btn-primary">
+          <span id="btnIcon"><i class="bi bi-lightning-fill"></i></span>
+          <span id="btnText">Get Answer</span>
+        </button>
+      </div>
+
+      <!-- Result -->
+      <div id="queryResult" class="result mt-4">
+        <pre id="queryOutput"></pre>
+      </div>
+    </div>
+
+    <!-- Right: Apps Like This Sidebar -->
+    <div class="sidebar">
+      <div class="border rounded-3 bg-white p-3 shadow-sm">
+        <h6 class="fw-semibold mb-3">Apps like this</h6>
+
+        <a href="#" class="app-link disabled">
+          <i class="bi bi-book"></i> Course Study Companion
+        </a>
+        <a href="#" class="app-link disabled">
+          <i class="bi bi-terminal"></i> Developer Onboarding Buddy
+        </a>
+        <a href="#" class="app-link disabled">
+          <i class="bi bi-people"></i> Client FAQ Assistant
+        </a>
+        <a href="#" class="app-link disabled">
+          <i class="bi bi-shield-check"></i> Compliance Clarifier
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const input = document.getElementById("queryInput");
+  const runBtn = document.getElementById("runQuery");
+  const output = document.getElementById("queryOutput");
+  const resultBox = document.getElementById("queryResult");
+  const btnIcon = document.getElementById("btnIcon");
+  const btnText = document.getElementById("btnText");
+
+  const prompt_prefix = "";
+
+  runBtn.addEventListener("click", () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const query = prompt_prefix + raw
+      console.log(query)
+    btnIcon.innerHTML = `<span class="spinner-border spinner-border-sm text-light"></span>`;
+    btnText.textContent = "Loading...";
+
+    fetch("https://www.natrul.ai/api/v1/ai/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: query,
+        //instruct: prompt_prefix,
+        user_key: "{{ user['user_key'] }}",
+        app_id: "{{ app_id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      output.textContent = data?.data?.answer || "No answer returned.";
+      resultBox.style.display = "block";
+      resultBox.classList.add("pulse");
+      setTimeout(() => resultBox.classList.remove("pulse"), 1000);
+    })
+    .catch(err => {
+      output.textContent = "An error occurred.";
+      console.error(err);
+    })
+    .finally(() => {
+      btnIcon.innerHTML = `<i class="bi bi-lightning-fill"></i>`;
+      btnText.textContent = "Get Answer";
+    });
+  });
+</script>
+{% endblock %}
